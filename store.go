@@ -27,6 +27,12 @@ var (
 	ErrNilCustomer = errors.New("Nil pointer to Customer")
 )
 
+// TransactionHistory represents a set of Transactions.
+type TransactionHistory struct {
+	Transactions []Transaction
+	Balance      float64
+}
+
 // --- Customers and Logins ---
 
 // SelectCustomerByAccountNo returns a pointer to a Customer.
@@ -143,7 +149,7 @@ func getFirstTransactionOfMonthIndex(list []Transaction, month time.Month) int {
 }
 
 // SelectBalance returns a customer's balance.
-func SelectBalance(cust *Customer) int {
+func SelectBalance(cust *Customer) float64 {
 	if cust == nil {
 		return 0
 	}
