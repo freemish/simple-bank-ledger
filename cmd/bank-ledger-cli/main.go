@@ -2,18 +2,31 @@ package main
 
 import (
 	"bankledger"
+	"bufio"
 	"fmt"
+	"os"
 
 	"github.com/freemish/errgo"
 )
 
-func main() {
-	// --- command-line solution ---
+var currentUser *bankledger.Customer
 
-	// test stuff:
+func main() {
+	scanner := bufio.NewScanner(os.Stdin)
+
+	fmt.Println("Welcome to World's Best Bank!")
+	fmt.Println(HelpText(currentUser))
+	for {
+		scanner.Scan()
+		HandleInput(scanner, currentUser)
+	}
+}
+
+func test() {
+	// test backend stuff:
 
 	// log in to make sure it fails
-	fmt.Println("Test 1 - Attempting login with no matching registered users. Should fail.")
+	fmt.Println("Test 1 - Attempting login with no matching registered users. Should error.")
 	_, err := bankledger.Login("molly", "1234")
 	if err != nil {
 		fmt.Println(errgo.Wrap(err).StackTrace())
@@ -35,7 +48,7 @@ func main() {
 	}
 
 	// try to log in with wrong password
-	fmt.Println("Test 3 - Trying to log in with wrong password. Should fail.")
+	fmt.Println("Test 3 - Trying to log in with wrong password. Should error.")
 	_, err = bankledger.Login("molly", "123")
 	if err != nil {
 		fmt.Println(errgo.Wrap(err).StackTrace())
@@ -75,7 +88,7 @@ func main() {
 	fmt.Printf("Test 6 - Balance is %.2f. Success!\n", balance)
 
 	// attempt to record too-large withdrawal
-	fmt.Println("Test 7 - Attempt to record a too-large withdrawal. Should fail.")
+	fmt.Println("Test 7 - Attempt to record a too-large withdrawal. Should error.")
 	err = cust.RecordTransaction("Test Transaction 2", "", -30.01)
 	if err == nil {
 		fmt.Println("Test 7 - No error encountered. Failed.")
@@ -106,6 +119,6 @@ func main() {
 	cust = nil
 	balance = cust.GetBalance()
 	if balance != 0 {
-		fmt.Println("what")
+		fmt.Println("Customer failed to log out?")
 	}
 }
