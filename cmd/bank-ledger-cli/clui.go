@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 // HandleInput hands off handling the user's input to helpers depending on whether
@@ -18,7 +19,7 @@ func HandleInput(scanner *bufio.Scanner, cust *bankledger.Customer) {
 }
 
 func handleLoginAndRegistrationOptions(scanner *bufio.Scanner) {
-	switch scanner.Text() {
+	switch strings.ToLower(scanner.Text()) {
 	case "g": // Login
 		currentUser = loginHandler(scanner)
 	case "r": // Register
@@ -54,9 +55,15 @@ func loginHandler(scanner *bufio.Scanner) *bankledger.Customer {
 }
 
 func registrationHandler(scanner *bufio.Scanner) *bankledger.Customer {
-	name := promptForInput(scanner, "Enter your name")
+	name := promptForInput(scanner, "Enter your full name")
 	username := promptForInput(scanner, "Enter your username")
 	password := promptForInput(scanner, "Enter your password")
+	passwordConfirm := promptForInput(scanner, "Confirm your password by typing it again")
+
+	if password != passwordConfirm {
+		fmt.Println("Your password confirmation didn't match. Registration cancelled.")
+		return nil
+	}
 
 	confirm := promptForInput(scanner, fmt.Sprintf("Are you sure you want to create an account with name %s and username %s?\nEnter y to confirm, any other key to cancel: ", name, username))
 	if confirm != "y" {
@@ -75,7 +82,7 @@ func registrationHandler(scanner *bufio.Scanner) *bankledger.Customer {
 }
 
 func handleUserOptions(scanner *bufio.Scanner, cust *bankledger.Customer) {
-	switch scanner.Text() {
+	switch strings.ToLower(scanner.Text()) {
 	case "h": // Help
 		fmt.Println(HelpText(cust))
 	case "x": // Log out
@@ -87,7 +94,7 @@ func handleUserOptions(scanner *bufio.Scanner, cust *bankledger.Customer) {
 	case "b": // View balance
 		fmt.Printf("Your balance is $%.2f.\n", cust.GetBalance())
 	case "r": // Record transaction
-		fmt.Println("(Implement recording transaction.)")
+		recordTransactionHandler(scanner, cust)
 	case "q": // Quit
 		os.Exit(1)
 	default: // Invalid response
@@ -101,4 +108,10 @@ func HelpText(cust *bankledger.Customer) string {
 		return "\"g\" - log in\n\"r\" - register\n\"h\" - help\n\"q\" - quit"
 	}
 	return "\"r\" - start a transaction\n\"v\" - view history\n\"b\" - view balance\n\"x\" - log out\n\"h\" - help\n\"q\" - log out and quit"
+}
+
+func recordTransactionHandler(scanner *bufio.Scanner, cust *bankledger.Customer) bool {
+	promptForInput(scanner, "Enter \"w\" to withdraw funds from your account, or \"d\" to deposit funds to your account.")
+
+	return true
 }

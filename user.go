@@ -99,7 +99,6 @@ func generateAccountNumber() string {
 // generatePasswordHash uses the bcrypt library to generate a salted hash.
 func generatePasswordHash(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	//return string(bytes), errgo.Wr
 	if err != nil {
 		return string(bytes), errgo.Wrap(err)
 	}
