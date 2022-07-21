@@ -84,10 +84,7 @@ func (cust *Customer) verifyLoginPassword(password string) bool {
 	}
 
 	err := bcrypt.CompareHashAndPassword([]byte(cust.PasswordHash), []byte(password))
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // generateAccountNumber is supposed to generate a "unique"
