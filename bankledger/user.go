@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/freemish/errgo"  // propagates stack traces for debugging/logging
+	//"github.com/freemish/errgo"  // propagates stack traces for debugging/logging
 	"golang.org/x/crypto/bcrypt" // for simplifying password hashing/salting
 )
 
@@ -32,13 +32,13 @@ type Customer struct {
 func CreateAccount(name, username, password string) (*Customer, error) {
 	// make sure account does not already exist
 	if SelectCustomerByUsername(username) != nil {
-		return nil, errgo.Wrap(ErrCustomerAlreadyExists)
+		return nil, ErrCustomerAlreadyExists
 	}
 
 	// make sure password can be hashed/salted
 	hash, err := generatePasswordHash(password)
 	if err != nil {
-		return nil, errgo.Wrap(err)
+		return nil, err
 	}
 
 	// build Customer type
@@ -53,7 +53,7 @@ func CreateAccount(name, username, password string) (*Customer, error) {
 	// store Customer
 	err = InsertCustomer(cust)
 	if err != nil {
-		return nil, errgo.Wrap(err)
+		return nil, err
 	}
 
 	return cust, nil
@@ -65,7 +65,7 @@ func Login(username, password string) (*Customer, error) {
 	cust := SelectCustomerByUsername(username)
 
 	if cust == nil {
-		return cust, errgo.Wrap(ErrCustomerDoesNotExist)
+		return cust, ErrCustomerDoesNotExist
 	}
 
 	if cust.verifyLoginPassword(password) {
@@ -73,7 +73,7 @@ func Login(username, password string) (*Customer, error) {
 		return cust, nil
 	}
 
-	return nil, errgo.Wrap(ErrPasswordDoesNotMatch)
+	return nil, ErrPasswordDoesNotMatch
 }
 
 // verifyLoginPassword returns true if password belongs to the
@@ -100,7 +100,7 @@ func generateAccountNumber() string {
 func generatePasswordHash(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return string(bytes), errgo.Wrap(err)
+		return string(bytes), err
 	}
 	return string(bytes), nil
 }

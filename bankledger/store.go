@@ -3,8 +3,7 @@ package bankledger
 import (
 	"errors"
 	"time"
-
-	"github.com/freemish/errgo"
+	// "github.com/freemish/errgo"
 )
 
 /*
@@ -60,7 +59,7 @@ func SelectCustomerByUsername(username string) *Customer {
 // InsertCustomer adds a Customer to the data store.
 func InsertCustomer(c *Customer) error {
 	if c == nil {
-		return errgo.Wrap(ErrNilCustomer)
+		return ErrNilCustomer
 	}
 	CustomerList = append(CustomerList, c)
 	return nil
@@ -69,7 +68,7 @@ func InsertCustomer(c *Customer) error {
 // UpdateLastLogin updates customer's last login in data store.
 func UpdateLastLogin(c *Customer) error {
 	if c == nil {
-		return errgo.Wrap(ErrNilCustomer)
+		return ErrNilCustomer
 	}
 	c.LastLoginDate = time.Now()
 	return nil
@@ -80,7 +79,7 @@ func UpdateLastLogin(c *Customer) error {
 // InsertTransaction enters a new transaction for the logged-in customer.
 func InsertTransaction(cust *Customer, t Transaction) error {
 	if cust == nil {
-		return errgo.Wrap(ErrNilCustomer)
+		return ErrNilCustomer
 	}
 	history := TransactionMap[cust]
 	history.Transactions = append(history.Transactions, t)

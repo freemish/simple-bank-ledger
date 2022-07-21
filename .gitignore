@@ -1,0 +1,4 @@
+# ignore binaries
+bank-ledger-cli
+bank-ledger-web
+simple-bank-ledger

@@ -1,11 +1,12 @@
 package main
 
 import (
-	"bankledger"
 	"bufio"
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/freemish/simple-bank-ledger/bankledger"
 )
 
 // HandleInput hands off handling the user's input to helpers depending on whether

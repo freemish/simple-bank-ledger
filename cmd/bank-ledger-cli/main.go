@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bankledger"
 	"bufio"
 	"fmt"
 	"os"
 
-	"github.com/freemish/errgo"
+	"github.com/freemish/simple-bank-ledger/bankledger"
+	//"github.com/freemish/errgo"
 )
 
 var currentUser *bankledger.Customer
@@ -29,7 +29,7 @@ func test() {
 	fmt.Println("Test 1 - Attempting login with no matching registered users. Should error.")
 	_, err := bankledger.Login("molly", "1234")
 	if err != nil {
-		fmt.Println(errgo.Wrap(err).StackTrace())
+		//fmt.Println(errgo.Wrap(err).StackTrace())
 		fmt.Println("Test 1 - Success!")
 	} else {
 		fmt.Println("Test 1 - Expected error not encountered. Failed.")
@@ -42,7 +42,7 @@ func test() {
 	if err == nil {
 		fmt.Println("Test 2 - No error encountered. Success!")
 	} else {
-		fmt.Println(errgo.Wrap(err).StackTrace())
+		//fmt.Println(errgo.Wrap(err).StackTrace())
 		fmt.Println("Test 2 - Unexpected error encountered. Failed.")
 		return
 	}
@@ -51,7 +51,7 @@ func test() {
 	fmt.Println("Test 3 - Trying to log in with wrong password. Should error.")
 	_, err = bankledger.Login("molly", "123")
 	if err != nil {
-		fmt.Println(errgo.Wrap(err).StackTrace())
+		//fmt.Println(errgo.Wrap(err).StackTrace())
 		fmt.Println("Test 3 - Success!")
 	} else {
 		fmt.Println("Test 3 - Expected error not encountered. Failed.")
@@ -62,7 +62,7 @@ func test() {
 	fmt.Println("Test 4 - Trying to log in with correct password. Should succeed.")
 	cust, err := bankledger.Login("molly", "1234")
 	if err != nil {
-		fmt.Println(errgo.Wrap(err).StackTrace())
+		//fmt.Println(errgo.Wrap(err).StackTrace())
 		fmt.Println("Test 4 - Unexpected error encountered. Failed.")
 		return
 	}
@@ -72,7 +72,7 @@ func test() {
 	fmt.Println("Test 5 - Record a deposit. Should succeed.")
 	err = cust.RecordTransaction("Test Transaction", "", 30.0)
 	if err != nil {
-		fmt.Println(errgo.Wrap(err).StackTrace())
+		//fmt.Println(errgo.Wrap(err).StackTrace())
 		fmt.Println("Test 5 - Unexpected error encountered. Failed.")
 		return
 	}
@@ -94,14 +94,14 @@ func test() {
 		fmt.Println("Test 7 - No error encountered. Failed.")
 		return
 	}
-	fmt.Println(errgo.Wrap(err).StackTrace())
+	//fmt.Println(errgo.Wrap(err).StackTrace())
 	fmt.Println("Test 7 - Expected error encountered. Success!")
 
 	// attempt to record valid withdrawal
 	fmt.Println("Test 8 - Record valid transaction. Should succeed.")
 	err = cust.RecordTransaction("Test Transaction 3", "", -30.00)
 	if err != nil {
-		fmt.Println(errgo.Wrap(err).StackTrace())
+		//fmt.Println(errgo.Wrap(err).StackTrace())
 		fmt.Println("Test 8 - Unexpected error encountered. Failed.")
 		return
 	}

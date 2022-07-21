@@ -4,8 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
-
-	"github.com/freemish/errgo"
+	//"github.com/freemish/errgo"
 )
 
 var (
@@ -37,12 +36,12 @@ func (t Transaction) String() string {
 // Rejects transaction if balance would drop below minimum or customer isn't logged in.
 func (cust *Customer) RecordTransaction(name, descr string, amount float64) error {
 	if cust == nil {
-		return errgo.Wrap(ErrFailedToAuthorize)
+		return ErrFailedToAuthorize
 	}
 
 	balance := SelectBalance(cust)
 	if (balance + amount) < MinimumBalance {
-		return errgo.Wrap(ErrBalanceTooLow)
+		return ErrBalanceTooLow
 	}
 
 	transaction := Transaction{
@@ -54,7 +53,7 @@ func (cust *Customer) RecordTransaction(name, descr string, amount float64) erro
 
 	err := InsertTransaction(cust, transaction)
 	if err != nil {
-		return errgo.Wrap(err)
+		return err
 	}
 	return nil
 }
