@@ -19,11 +19,13 @@ var (
 // checkUsernameExists and insertAccount are both nullable.
 func CreateAccount(
 	username, name, password string,
-	checkUsernameExists func(string) bool,
-	insertAccount func(*entities.Customer),
+	ics ICustomerStore,
 ) (*entities.Customer, error) {
-	if checkUsernameExists != nil && checkUsernameExists(username) {
-		return nil, ErrCustomerAlreadyExists
+	if ics != nil {
+		cust, _ := ics.SelectCustomerByUsername(username)
+		if cust != nil {
+			return nil, ErrCustomerAlreadyExists
+		}
 	}
 
 	passHash, err := generatePasswordHash(password)
@@ -39,8 +41,8 @@ func CreateAccount(
 		AccountNumber: generateAccountNumber(),
 	}
 
-	if insertAccount != nil {
-		insertAccount(cust)
+	if ics != nil {
+		return cust, ics.InsertCustomer(cust)
 	}
 
 	return cust, nil
@@ -48,17 +50,15 @@ func CreateAccount(
 
 // Login checks that the username exists, then checks that the password
 // is correct for the customer.
-// updateLastLogin is nullable.
 func Login(
 	username, password string,
-	selectCustomerByUsername func(string) (*entities.Customer, error),
-	updateLastLogin func(*entities.Customer),
+	ics ICustomerStore,
 ) (*entities.Customer, error) {
-	if selectCustomerByUsername == nil {
+	if ics == nil {
 		return nil, ErrCustomerDoesNotExist
 	}
 
-	cust, _ := selectCustomerByUsername(username)
+	cust, _ := ics.SelectCustomerByUsername(username)
 	if cust == nil {
 		return cust, ErrCustomerDoesNotExist
 	}
@@ -67,8 +67,8 @@ func Login(
 		return nil, ErrPasswordDoesNotMatch
 	}
 
-	if updateLastLogin != nil {
-		updateLastLogin(cust)
+	if ics != nil {
+		return cust, ics.UpdateLastLogin(cust)
 	}
 	return cust, nil
 }

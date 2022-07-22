@@ -10,38 +10,34 @@ import (
 
 var correctPassword = "1234"
 
-// --- Mock helper functions
+// --- Mock helpers
 
-func mockCheckUsernameExistsReturnTrue(username string) bool {
-	return true
+type MockCustomerStore struct {
+	usernameExists bool
+	password       string
 }
 
-func mockCheckUsernameExistsReturnFalse(username string) bool {
-	return false
+func (mcs MockCustomerStore) SelectCustomerByUsername(username string) (*entities.Customer, error) {
+	if !mcs.usernameExists {
+		return nil, ErrCustomerDoesNotExist
+	}
+
+	pHash, _ := generatePasswordHash(mcs.password)
+	return &entities.Customer{Username: username, PasswordHash: pHash}, nil
 }
 
-func mockInsertCustomer(c *entities.Customer) {}
-
-func mockUpdateLastLogin(c *entities.Customer) {}
-
-func mockSelectCustomerByUsernameCorrectPassword(username string) (*entities.Customer, error) {
-	phash, _ := generatePasswordHash(correctPassword)
-	return &entities.Customer{Username: username, PasswordHash: phash}, nil
+func (mcs MockCustomerStore) UpdateLastLogin(c *entities.Customer) error {
+	return nil
 }
 
-func mockSelectCustomerByUsernameIncorrectPassword(username string) (*entities.Customer, error) {
-	phash, _ := generatePasswordHash(username)
-	return &entities.Customer{Username: username, PasswordHash: phash}, nil
-}
-
-func mockSelectCustomerByUsernameNotFound(username string) (*entities.Customer, error) {
-	return nil, ErrCustomerDoesNotExist
+func (mcs MockCustomerStore) InsertCustomer(c *entities.Customer) error {
+	return nil
 }
 
 // --- Tests
 
 func TestCreateAccountNoPersistence(t *testing.T) {
-	cust, err := CreateAccount("molly", "Molly", correctPassword, nil, nil)
+	cust, err := CreateAccount("molly", "Molly", correctPassword, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -59,14 +55,14 @@ func TestCreateAccountNoPersistence(t *testing.T) {
 }
 
 func TestCreateAccountMockPersistenceAccountCreationFailure(t *testing.T) {
-	_, err := CreateAccount("", "", "", mockCheckUsernameExistsReturnTrue, mockInsertCustomer)
+	_, err := CreateAccount("", "", "", MockCustomerStore{usernameExists: true})
 	if err != ErrCustomerAlreadyExists {
 		t.Errorf("Expected ErrCustomerAlreadyExists: %v", err)
 	}
 }
 
 func TestCreateAccountMockPersistence(t *testing.T) {
-	cust, err := CreateAccount("molly", "Molly", correctPassword, mockCheckUsernameExistsReturnFalse, mockInsertCustomer)
+	cust, err := CreateAccount("molly", "Molly", correctPassword, MockCustomerStore{usernameExists: false})
 	if err != nil {
 		t.Error(err)
 	}
@@ -84,14 +80,14 @@ func TestCreateAccountMockPersistence(t *testing.T) {
 }
 
 func TestLoginNoPersistenceLoginFailure(t *testing.T) {
-	_, err := Login("molly", correctPassword, nil, nil)
+	_, err := Login("molly", correctPassword, nil)
 	if err != ErrCustomerDoesNotExist {
 		t.Error(err)
 	}
 }
 
 func TestLoginPass(t *testing.T) {
-	cust, err := Login("molly", correctPassword, mockSelectCustomerByUsernameCorrectPassword, mockUpdateLastLogin)
+	cust, err := Login("molly", correctPassword, MockCustomerStore{usernameExists: true, password: correctPassword})
 	if err != nil {
 		t.Error(err)
 	}
@@ -101,14 +97,14 @@ func TestLoginPass(t *testing.T) {
 }
 
 func TestLoginFail(t *testing.T) {
-	_, err := Login("molly", "wrongpassword", mockSelectCustomerByUsernameIncorrectPassword, mockUpdateLastLogin)
+	_, err := Login("molly", "wrongpassword", MockCustomerStore{usernameExists: true, password: correctPassword})
 	if err != ErrPasswordDoesNotMatch {
 		t.Error(err)
 	}
 }
 
 func TestLoginFailUsernameNotFound(t *testing.T) {
-	_, err := Login("golly", correctPassword, mockSelectCustomerByUsernameNotFound, mockUpdateLastLogin)
+	_, err := Login("golly", correctPassword, MockCustomerStore{usernameExists: false})
 	if err != ErrCustomerDoesNotExist {
 		t.Error(err)
 	}
