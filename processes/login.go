@@ -15,21 +15,8 @@ var (
 	ErrPasswordDoesNotMatch  = errors.New("password does not match")
 )
 
-// generatePasswordHash uses the bcrypt library to generate a salted hash.
-func generatePasswordHash(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return string(bytes), err
-	}
-	return string(bytes), nil
-}
-
-func generateAccountNumber() string {
-	accNum := "1234567890"
-	return accNum
-}
-
 // CreateAccount creates an account if username does not exist.
+// checkUsernameExists and insertAccount are both nullable.
 func CreateAccount(
 	username, name, password string,
 	checkUsernameExists func(string) bool,
@@ -57,4 +44,50 @@ func CreateAccount(
 	}
 
 	return cust, nil
+}
+
+// Login checks that the username exists, then checks that the password
+// is correct for the customer.
+// updateLastLogin is nullable.
+func Login(
+	username, password string,
+	selectCustomerByUsername func(string) (*entities.Customer, error),
+	updateLastLogin func(*entities.Customer),
+) (*entities.Customer, error) {
+	if selectCustomerByUsername == nil {
+		return nil, ErrCustomerDoesNotExist
+	}
+
+	cust, _ := selectCustomerByUsername(username)
+	if cust == nil {
+		return cust, ErrCustomerDoesNotExist
+	}
+
+	if !verifyLoginPassword(password, cust.PasswordHash) {
+		return nil, ErrPasswordDoesNotMatch
+	}
+
+	if updateLastLogin != nil {
+		updateLastLogin(cust)
+	}
+	return cust, nil
+}
+
+// generatePasswordHash uses the bcrypt library to generate a salted hash.
+func generatePasswordHash(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return string(bytes), err
+	}
+	return string(bytes), nil
+}
+
+func generateAccountNumber() string {
+	accNum := "1234567890"
+	return accNum
+}
+
+// verifyLoginPassword returns true if password matches password hash.
+func verifyLoginPassword(password, passwordHash string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password)) == nil
 }
