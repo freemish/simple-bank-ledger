@@ -11,11 +11,15 @@ type InMemoryHandler struct {
 	cacheStore       persistence.InMemoryCacheStore
 }
 
-func NewInMemoryHandler() InMemoryHandler {
-	return InMemoryHandler{
+func NewInMemoryHandler() *InMemoryHandler {
+	return &InMemoryHandler{
 		LoggedInCustomer: nil,
 		cacheStore:       persistence.NewInMemoryCacheStore(),
 	}
+}
+
+func (imh *InMemoryHandler) GetLoggedInCustomer() *entities.Customer {
+	return imh.LoggedInCustomer
 }
 
 func (imh *InMemoryHandler) Login(username, password string) (*entities.Customer, error) {
