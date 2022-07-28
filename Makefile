@@ -5,7 +5,7 @@ cli-app-exec: cli-app
 	@./cli-app || true
 
 # `make cli-app` builds the go binary for the cli app.
-cli-app:
+cli-app: cli-app-clean
 	@cd cmd/bank-ledger-cli && go build -o ../../cli-app
 
 # `make test-all` tests all subdirectories in project.
