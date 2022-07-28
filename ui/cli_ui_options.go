@@ -10,12 +10,16 @@ import (
 )
 
 var scanner = bufio.NewScanner(os.Stdin)
+var loggedOutHelpText = ""
+var loggedInHelpText = ""
+var optionsMap = make(map[string]cliOption)
 
 type cliOption struct {
 	Key                 string
 	Desc                string
 	ShowWhenLoggedIn    bool
 	ShowWhenNotLoggedIn bool
+	CliFunc             func(adapters.IProcessHandler)
 }
 
 var optionsList = []cliOption{
@@ -24,52 +28,64 @@ var optionsList = []cliOption{
 		Desc:                MessageCliLoginDesc,
 		ShowWhenLoggedIn:    false,
 		ShowWhenNotLoggedIn: true,
+		CliFunc:             AdapterLogin,
 	},
 	{
 		Key:                 MessageCliRegisterKey,
 		Desc:                MessageCliRegisterDesc,
 		ShowWhenLoggedIn:    false,
 		ShowWhenNotLoggedIn: true,
+		CliFunc:             AdapterRegister,
 	},
 	{
 		Key:                 MessageCliHelpKey,
 		Desc:                MessageCliHelpDesc,
 		ShowWhenLoggedIn:    true,
 		ShowWhenNotLoggedIn: true,
+		CliFunc:             AdapterHelp,
 	},
 	{
 		Key:                 MessageCliTransactKey,
 		Desc:                MessageCliTransactDesc,
 		ShowWhenLoggedIn:    true,
 		ShowWhenNotLoggedIn: false,
+		CliFunc:             AdapterTransact,
 	},
 	{
 		Key:                 MessageCliViewHistoryKey,
 		Desc:                MessageCliViewHistoryDesc,
 		ShowWhenLoggedIn:    true,
 		ShowWhenNotLoggedIn: false,
+		CliFunc:             AdapterViewTransactions,
 	},
 	{
 		Key:                 MessageCliBalanceKey,
 		Desc:                MessageCliBalanceDesc,
 		ShowWhenLoggedIn:    true,
 		ShowWhenNotLoggedIn: false,
+		CliFunc:             AdapterBalance,
 	},
 	{
 		Key:                 MessageCliLogOutKey,
 		Desc:                MessageCliLogOutDesc,
 		ShowWhenLoggedIn:    true,
 		ShowWhenNotLoggedIn: false,
+		CliFunc:             AdapterLogout,
 	},
 	{
 		Key:                 MessageCliQuitKey,
 		Desc:                MessageCliQuitDesc,
 		ShowWhenLoggedIn:    true,
 		ShowWhenNotLoggedIn: true,
+		CliFunc:             AdapterQuit,
 	},
 }
 
-var optionsMap = make(map[string]cliOption)
+func InitializeUIModule() {
+	populateOptionsMap()
+	loggedOutHelpText = calculateHelpText(false)
+	loggedInHelpText = calculateHelpText(true)
+}
 
 func populateOptionsMap() {
 	if len(optionsMap) > 0 {
@@ -80,9 +96,19 @@ func populateOptionsMap() {
 	}
 }
 
+func calculateHelpText(loggedIn bool) string {
+	var promptsToJoin = []string{}
+	for _, val := range optionsList {
+		if (loggedIn && val.ShowWhenLoggedIn) || (!loggedIn && val.ShowWhenNotLoggedIn) {
+			promptsToJoin = append(promptsToJoin, fmt.Sprintf("\"%s\" - %s", val.Key, val.Desc))
+		}
+	}
+	return strings.Join(promptsToJoin, "\n")
+}
+
 func StartInteraction() {
 	imh := adapters.NewInMemoryHandler()
-	populateOptionsMap()
+	InitializeUIModule()
 
 	fmt.Println(MessageCliWelcomeMessage)
 	fmt.Println(HelpText(imh.GetLoggedInCustomer() != nil))
@@ -90,7 +116,10 @@ func StartInteraction() {
 		inputStr := PromptForInput(">>> ")
 		funcOpt := GetOptionFromInput(inputStr, imh.GetLoggedInCustomer() != nil)
 		if funcOpt != nil {
-			GetCliHandlerFromCliOption(*funcOpt)(imh)
+			funcOpt.CliFunc(imh)
+		} else {
+			fmt.Println(MessageCliDidNotRecognizeInput)
+			fmt.Println(HelpText(imh.GetLoggedInCustomer() != nil))
 		}
 	}
 }
@@ -102,13 +131,10 @@ func PromptForInput(prompt string) string {
 }
 
 func HelpText(loggedIn bool) string {
-	var promptsToJoin = []string{}
-	for _, val := range optionsList {
-		if (loggedIn && val.ShowWhenLoggedIn) || (!loggedIn && val.ShowWhenNotLoggedIn) {
-			promptsToJoin = append(promptsToJoin, fmt.Sprintf("\"%s\" - %s", val.Key, val.Desc))
-		}
+	if loggedIn {
+		return loggedInHelpText
 	}
-	return strings.Join(promptsToJoin, "\n")
+	return loggedOutHelpText
 }
 
 func GetOptionFromInput(input string, loggedIn bool) *cliOption {
