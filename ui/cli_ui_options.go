@@ -5,20 +5,20 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/freemish/simple-bank-ledger/adapters"
 )
 
 var scanner = bufio.NewScanner(os.Stdin)
 
-type optionToFunction struct {
+type cliOption struct {
 	Key                 string
 	Desc                string
-	Function            func(args ...interface{})
-	FunctionArgs        []interface{}
 	ShowWhenLoggedIn    bool
 	ShowWhenNotLoggedIn bool
 }
 
-var optionsList = []optionToFunction{
+var optionsList = []cliOption{
 	{
 		Key:                 MessageCliLoginKey,
 		Desc:                MessageCliLoginDesc,
@@ -69,7 +69,7 @@ var optionsList = []optionToFunction{
 	},
 }
 
-var optionsMap = make(map[string]optionToFunction)
+var optionsMap = make(map[string]cliOption)
 
 func populateOptionsMap() {
 	if len(optionsMap) > 0 {
@@ -81,11 +81,17 @@ func populateOptionsMap() {
 }
 
 func StartInteraction() {
+	imh := adapters.NewInMemoryHandler()
 	populateOptionsMap()
+
 	fmt.Println(MessageCliWelcomeMessage)
-	fmt.Println(HelpText(false))
+	fmt.Println(HelpText(imh.GetLoggedInCustomer() != nil))
 	for {
-		PromptForInput("")
+		inputStr := PromptForInput(">>> ")
+		funcOpt := GetOptionFromInput(inputStr, imh.GetLoggedInCustomer() != nil)
+		if funcOpt != nil {
+			GetCliHandlerFromCliOption(*funcOpt)(imh)
+		}
 	}
 }
 
@@ -105,12 +111,9 @@ func HelpText(loggedIn bool) string {
 	return strings.Join(promptsToJoin, "\n")
 }
 
-func GetOptionFromInput(input string, loggedIn bool) *optionToFunction {
+func GetOptionFromInput(input string, loggedIn bool) *cliOption {
 	optionVal, exists := optionsMap[input]
-	fmt.Println(exists)
 	if !exists || (loggedIn && !optionVal.ShowWhenLoggedIn) || (!loggedIn && !optionVal.ShowWhenNotLoggedIn) {
-		fmt.Println()
-		fmt.Println(HelpText(loggedIn))
 		return nil
 	}
 	return &optionVal
