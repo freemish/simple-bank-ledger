@@ -11,3 +11,7 @@ cli-app:
 # `make test-all` tests all subdirectories in project.
 test-all:
 	@go test ./...
+
+# `make cli-app-clean` removes any existing binary for the cli app.
+cli-app-clean:
+	@rm cli-app || true
