@@ -7,11 +7,8 @@ import (
 	"github.com/freemish/simple-bank-ledger/processes"
 )
 
-func getInMemoryCacheStore() InMemoryCacheStore {
-	return InMemoryCacheStore{
-		customers:                 make(map[string]*entities.Customer),
-		transactions_by_customers: make(map[string][]*entities.Transaction),
-	}
+func getInMemoryCacheStore() *InMemoryCacheStore {
+	return NewInMemoryCacheStore()
 }
 
 func TestSelectCustomerByUsernameDoesNotExist(t *testing.T) {

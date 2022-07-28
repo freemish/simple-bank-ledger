@@ -8,7 +8,7 @@ import (
 
 type InMemoryHandler struct {
 	LoggedInCustomer *entities.Customer
-	cacheStore       persistence.InMemoryCacheStore
+	cacheStore       *persistence.InMemoryCacheStore
 }
 
 func NewInMemoryHandler() *InMemoryHandler {
