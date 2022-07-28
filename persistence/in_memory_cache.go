@@ -17,6 +17,13 @@ type InMemoryCacheStore struct {
 	transactions_by_customers map[string][]*entities.Transaction
 }
 
+func NewInMemoryCacheStore() InMemoryCacheStore {
+	return InMemoryCacheStore{
+		customers:                 make(map[string]*entities.Customer),
+		transactions_by_customers: make(map[string][]*entities.Transaction),
+	}
+}
+
 func (imc InMemoryCacheStore) SelectCustomerByUsername(username string) (*entities.Customer, error) {
 	customer, exists := imc.customers[username]
 	if !exists {
