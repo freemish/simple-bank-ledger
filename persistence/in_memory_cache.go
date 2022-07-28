@@ -65,7 +65,9 @@ func (imc InMemoryCacheStore) InsertTransaction(tx *entities.Transaction) error 
 		return ErrTransactionNotMappedToCustomer
 	}
 	txs, _ := imc.SelectTransactionsByUsername(tx.Customer.Username)
-	tx.ID = tx.Customer.ID*10 + len(txs) + 1
+	if tx.ID == 0 {
+		tx.ID = tx.Customer.ID*10 + len(txs) + 1
+	}
 	tx.Created = time.Now()
 	imc.transactions_by_customers[tx.Customer.Username] = append(txs, tx)
 	return nil
