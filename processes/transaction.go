@@ -10,7 +10,7 @@ func RecordTransaction(cust *entities.Customer, is_debit bool, amount float64, v
 		ID:       voided_tx,
 		IsDebit:  is_debit,
 		Amount:   amount,
-		TranCode: GetTranCode(is_debit, bool(voided_tx == 0)),
+		TranCode: GetTranCode(is_debit, voided_tx != 0),
 	}
 	err := its.InsertTransaction(tx)
 	return tx, err
