@@ -91,6 +91,10 @@ func TestLoginPass(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	if cust == nil {
+		t.Error("Customer should not be nil")
+		return
+	}
 	if !verifyLoginPassword(correctPassword, cust.PasswordHash) {
 		t.Error("Incorrect password but login passed")
 	}
