@@ -15,6 +15,8 @@ The goal is to create an interface that:
 
 ## Some cleanup goals
 
+- [ ] Add some password validation rules
+- [ ] Validate debit/credit/voids and negative amounts
 - [ ] Implement test coverage reporting
 - [ ] Make UI strings internationalizeable
 - [ ] Improve test coverage
@@ -22,7 +24,7 @@ The goal is to create an interface that:
 
 ## Some stretch goals
 
+- [ ] Use ledger "layers"
 - [ ] Implement with file-based storage
-- [ ] Add some password validation rules
 - [ ] Add a GUI implementation
 - [ ] Add an API implementation
