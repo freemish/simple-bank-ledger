@@ -5,6 +5,8 @@ import (
 	"testing"
 )
 
+// TODO: add assertions to these tests
+
 func TestHelpTextNotLoggedIn(t *testing.T) {
 	fmt.Println(HelpText(false))
 }
