@@ -1,17 +1,22 @@
 # Make and execute simple bank ledger applications.
 
-# `make cli-app-exec` builds the go binary and runs it.
-cli-app-exec: cli-app
+# `make run` builds the go binary and runs it.
+run: bin
 	@./cli-app || true
 
-# `make cli-app` builds the go binary for the cli app.
-cli-app: cli-app-clean
+# `make bin` builds the go binary for the cli app.
+bin: clean
 	@cd cmd/bank-ledger-cli && go build -o ../../cli-app
 
-# `make test-all` tests all subdirectories in project.
-test-all:
-	@go test ./...
+# `make test` tests all subdirectories in project.
+test:
+	@go test ./... -coverprofile=cover.out
 
-# `make cli-app-clean` removes any existing binary for the cli app.
-cli-app-clean:
+# `make report` makes a test coverage report rendered in html.
+report:
+	@go tool cover -html=cover.out -o cover.html
+
+# `make clean` removes any existing binary for the cli app.
+clean:
 	@rm cli-app || true
+	

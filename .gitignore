@@ -1,2 +1,6 @@
 # ignore binaries
 cli-app
+
+# ignore test coverage output
+cover.out
+cover.html
