@@ -17,7 +17,7 @@ The goal is to create an interface that:
 
 - [ ] Add some password validation rules
 - [ ] Validate debit/credit/voids and negative amounts
-- [ ] Implement test coverage reporting
+- [x] Implement test coverage reporting
 - [ ] Make UI strings internationalizeable
 - [ ] Improve test coverage
 - [ ] Use test tables and assertions for all unit tests where sensible

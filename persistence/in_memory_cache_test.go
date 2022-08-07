@@ -89,10 +89,8 @@ func TestLogin(t *testing.T) {
 	}
 }
 
-func TestSelectTransactions(t *testing.T) {
+func TestSelectTransactionsSuccessZero(t *testing.T) {
 	var imc = getInMemoryCacheStore()
-	cust, _ := processes.CreateAccount("moo", "Molly", "1234", imc)
-	cust2, _ := processes.CreateAccount("moo2", "Molly", "1234", imc)
 
 	txs, err := imc.SelectTransactionsByUsername("moo")
 	if err != nil {
@@ -101,8 +99,40 @@ func TestSelectTransactions(t *testing.T) {
 	if len(txs) != 0 {
 		t.Errorf("Did not expect to have any txs returned from selection! %v", txs)
 	}
+}
 
-	err = imc.InsertTransaction(&entities.Transaction{
+func TestInsertTransactionNilCustomer(t *testing.T) {
+	var imc = getInMemoryCacheStore()
+	err := imc.InsertTransaction(&entities.Transaction{
+		Amount:      2.09,
+		Description: "This is a test",
+	})
+	if err != ErrTransactionNotMappedToCustomer {
+		t.Errorf(("Expected error related to transaction not being mapped to customer"))
+	}
+}
+
+func TestInsertTransactionUnknownCustomer(t *testing.T) {
+	var imc = getInMemoryCacheStore()
+	cust, _ := processes.CreateAccount("moo", "Molly", "1234", nil)
+	cust.ID = 2
+	err := imc.InsertTransaction(&entities.Transaction{
+		Customer:    *cust,
+		Amount:      2.09,
+		Description: "This is a test",
+	})
+	if err != ErrTransactionNotMappedToCustomer {
+		t.Errorf(("Expected error related to transaction not being mapped to customer"))
+	}
+}
+
+func TestTransactionsFunctional(t *testing.T) {
+	var imc = getInMemoryCacheStore()
+	cust, _ := processes.CreateAccount("moo", "Molly", "1234", imc)
+	cust2, _ := processes.CreateAccount("moo2", "Molly", "1234", imc)
+
+	// Insert 1 tx for cust2
+	err := imc.InsertTransaction(&entities.Transaction{
 		Customer:    *cust2,
 		Amount:      2.09,
 		Description: "This is a test",
@@ -111,18 +141,20 @@ func TestSelectTransactions(t *testing.T) {
 		t.Errorf("Expected to have no problem inserting transaction: %v", err)
 	}
 
+	// Insert 1 tx for cust
 	imc.InsertTransaction(&entities.Transaction{
 		Customer:    *cust,
 		Amount:      -1.09,
 		Description: "This is a test",
 	})
-	txs, err = imc.SelectTransactionsByUsername("moo")
+	txs, err := imc.SelectTransactionsByUsername("moo")
 	if err != nil {
 		t.Errorf("Got unexpected error from selecting transactions: %v", err)
 	}
 	if len(txs) != 1 {
 		t.Errorf("Expected exactly one transaction in returned list! Got: %v", txs)
 	}
+	// Assert that the transaction is the one mapped to cust, not cust2
 	if txs[0].Amount != -1.09 {
 		t.Errorf("Unexpected transaction value: %v", txs[0])
 	}

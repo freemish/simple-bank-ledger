@@ -12,8 +12,12 @@ bin: clean
 test:
 	@go test ./... -coverprofile=cover.out
 
-# `make report` makes a test coverage report rendered in html.
+# `make report` prints out a test coverage report listed by function to std out.
 report:
+	@go tool cover -func cover.out
+
+# `make report-html` makes a test coverage report rendered in html.
+report-html:
 	@go tool cover -html=cover.out -o cover.html
 
 # `make clean` removes any existing binary for the cli app.
