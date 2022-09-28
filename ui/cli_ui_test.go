@@ -5,18 +5,27 @@ import (
 	"testing"
 )
 
-// TODO: add assertions to these tests
-
 func TestHelpTextNotLoggedIn(t *testing.T) {
-	fmt.Println(HelpText(false))
+	InitializeUIModule()
+	want := "\"g\" - log in\n\"r\" - register\n\"h\" - help\n\"q\" - quit"
+	got := HelpText(false)
+
+	if want != got {
+		t.Errorf("Wanted: \n---%s but got: \n---%s", want, got)
+	}
 }
 
 func TestHelpTextLoggedIn(t *testing.T) {
-	fmt.Println(HelpText(true))
+	InitializeUIModule()
+	got := HelpText(true)
+	want := "\"h\" - help\n\"t\" - start transaction\n\"v\" - view history\n\"b\" - balance\n\"x\" - log out\n\"q\" - quit"
+	if want != got {
+		t.Errorf("Wanted: \n---%s but got: \n---%s", want, got)
+	}
 }
 
 func TestGetOptionFromInput(t *testing.T) {
-	populateOptionsMap()
+	InitializeUIModule()
 
 	fmt.Println("Testing not logged in:")
 	for _, inputOption := range optionsList {

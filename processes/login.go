@@ -67,10 +67,8 @@ func Login(
 		return nil, ErrPasswordDoesNotMatch
 	}
 
-	if ics != nil {
-		return cust, ics.UpdateLastLogin(cust)
-	}
-	return cust, nil
+	return cust, ics.UpdateLastLogin(cust)
+
 }
 
 // generatePasswordHash uses the bcrypt library to generate a salted hash.
